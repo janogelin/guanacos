@@ -1,0 +1,13 @@
+README.md
+setup.py
+src/ollama_chat/__init__.py
+src/ollama_chat/app.py
+src/ollama_chat/command_history.py
+src/ollama_chat/interactive_prompt.py
+src/ollama_chat/ollama_client.py
+src/ollama_chat.egg-info/PKG-INFO
+src/ollama_chat.egg-info/SOURCES.txt
+src/ollama_chat.egg-info/dependency_links.txt
+src/ollama_chat.egg-info/entry_points.txt
+src/ollama_chat.egg-info/requires.txt
+src/ollama_chat.egg-info/top_level.txt

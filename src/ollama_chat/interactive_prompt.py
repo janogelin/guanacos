@@ -1,0 +1,100 @@
+"""
+Interactive prompt module with command history navigation using arrow keys.
+"""
+
+import sys
+import termios
+import tty
+from typing import Optional
+
+from .command_history import CommandHistory
+
+class InteractivePrompt:
+    """Handles interactive command input with history navigation."""
+    
+    ARROW_UP = '\x1b[A'
+    ARROW_DOWN = '\x1b[B'
+    BACKSPACE = '\x7f'
+    CTRL_C = '\x03'
+    
+    def __init__(self, prompt_text: str = ">>> "):
+        self.prompt_text = prompt_text
+        self.history = CommandHistory()
+        self.current_input = ""
+        self.cursor_pos = 0
+
+    def _get_char(self) -> str:
+        """Get a single character from stdin without echo."""
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+            
+            # Check if it's an escape sequence
+            if ch == '\x1b':
+                ch += sys.stdin.read(2)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+    def _clear_line(self) -> None:
+        """Clear the current line and move cursor to the start."""
+        sys.stdout.write('\r' + ' ' * (len(self.prompt_text) + len(self.current_input)) + '\r')
+        sys.stdout.flush()
+
+    def _redraw_line(self) -> None:
+        """Redraw the current line with prompt and input."""
+        self._clear_line()
+        sys.stdout.write(self.prompt_text + self.current_input)
+        sys.stdout.flush()
+
+    def get_input(self) -> Optional[str]:
+        """
+        Get input from the user with command history navigation.
+        
+        Returns:
+            The entered command or None if Ctrl+C was pressed
+        """
+        self.current_input = ""
+        self.cursor_pos = 0
+        sys.stdout.write(self.prompt_text)
+        sys.stdout.flush()
+        
+        while True:
+            char = self._get_char()
+            
+            if char == self.CTRL_C:
+                print("\nExiting...")
+                return None
+                
+            elif char == '\r':  # Enter key
+                print()  # Move to next line
+                command = self.current_input
+                if command:
+                    self.history.add_command(command)
+                return command
+                
+            elif char == self.BACKSPACE:
+                if self.current_input:
+                    self.current_input = self.current_input[:-1]
+                    self._redraw_line()
+                    
+            elif char == self.ARROW_UP:
+                prev_command = self.history.get_previous_command()
+                if prev_command:
+                    self.current_input = prev_command
+                    self._redraw_line()
+                    
+            elif char == self.ARROW_DOWN:
+                next_command = self.history.get_next_command()
+                self.current_input = next_command  # Will be empty string if no next command
+                self._redraw_line()
+                
+            elif len(char) == 1 and char.isprintable():
+                self.current_input += char
+                self._redraw_line()
+
+    def get_history(self) -> list[str]:
+        """Return all commands in history."""
+        return self.history.get_all_commands() 
