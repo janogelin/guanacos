@@ -3,17 +3,35 @@ Main application module for the interactive Ollama chat program.
 """
 
 import sys
+import argparse
 from typing import Optional
 
 from .ollama_client import OllamaClient
 from .interactive_prompt import MusicPrompt
 
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Interactive Music Chat using Ollama")
+    parser.add_argument("--host", default="http://localhost:11434",
+                       help="Ollama server host (default: http://localhost:11434)")
+    parser.add_argument("--model", default="gemma3:4b",
+                       help="Model to use (default: gemma3:4b)")
+    parser.add_argument("--timeout", type=int, default=30,
+                       help="Request timeout in seconds (default: 30)")
+    parser.add_argument("--debug", action="store_true",
+                       help="Enable debug mode to see query enhancements")
+    return parser.parse_args()
+
 class OllamaChatApp:
     """Main application class for the interactive Ollama chat."""
     
-    def __init__(self, host: str = 'http://localhost:11434', model: str = 'gemma3:4b'):
+    def __init__(self, host: str = 'http://localhost:11434', 
+                 model: str = 'gemma3:4b',
+                 timeout: int = 30,
+                 debug: bool = False):
         self.client = OllamaClient(host, model)
-        self.prompt = MusicPrompt("Chat 🎵 > ")
+        self.client.set_timeout(timeout)
+        self.prompt = MusicPrompt("Chat 🎵 > ", debug=debug)
         
         # Define the music lover persona
         self.client.set_system_prompt("""You are an enthusiastic and knowledgeable music lover with a deep passion 
@@ -26,7 +44,8 @@ for all genres of music. You have:
 - The ability to explain complex musical concepts in an accessible way
 
 Please maintain this personality in all your responses, sharing your enthusiasm 
-and personal perspective while being informative and engaging.""")
+and personal perspective while being informative and engaging. When discussing 
+music theory concepts, explain them in an accessible way while maintaining accuracy.""")
 
     def check_ollama_connection(self) -> bool:
         """Check if we can connect to the Ollama server."""
@@ -81,5 +100,11 @@ and personal perspective while being informative and engaging.""")
 
 def main() -> None:
     """Entry point for the application."""
-    app = OllamaChatApp()
+    args = parse_args()
+    app = OllamaChatApp(
+        host=args.host,
+        model=args.model,
+        timeout=args.timeout,
+        debug=args.debug
+    )
     app.run() 
