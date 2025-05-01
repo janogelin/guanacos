@@ -11,7 +11,7 @@ from .interactive_prompt import InteractivePrompt
 class OllamaChatApp:
     """Main application class for the interactive Ollama chat."""
     
-    def __init__(self, host: str = 'http://localhost:11434', model: str = 'gemma:4b'):
+    def __init__(self, host: str = 'http://localhost:11434', model: str = 'gemma3:4b'):
         self.client = OllamaClient(host, model)
         self.prompt = InteractivePrompt("Chat 🗣️ > ")
         
@@ -30,9 +30,11 @@ and personal perspective while being informative and engaging.""")
 
     def check_ollama_connection(self) -> bool:
         """Check if we can connect to the Ollama server."""
-        if not self.client.check_connection():
-            print("Error: Could not connect to Ollama server. Is it running?")
+        success, message = self.client.check_connection()
+        if not success:
+            print(f"Error: {message}")
             return False
+        print(f"Success: {message}")
         return True
 
     def run(self) -> None:
@@ -40,7 +42,7 @@ and personal perspective while being informative and engaging.""")
         if not self.check_ollama_connection():
             sys.exit(1)
 
-        print(f"Welcome to the Interactive Music Chat! (Using {self.client.model})")
+        print(f"\nWelcome to the Interactive Music Chat! (Using {self.client.model})")
         print("Type your questions about music, or press Ctrl+C to exit.")
         print("Use ↑/↓ arrow keys to navigate through command history.")
         print()
@@ -56,9 +58,18 @@ and personal perspective while being informative and engaging.""")
 
                 # Print response stream
                 print("\nThinking... 🎵")
+                response_received = False
                 for response_chunk in self.client.chat(user_input):
+                    response_received = True
+                    if response_chunk.startswith("Error:"):
+                        print(f"\n{response_chunk}")
+                        break
                     print(response_chunk, end='', flush=True)
-                print("\n")  # Add spacing after response
+                
+                if response_received:
+                    print("\n")  # Add spacing after response
+                else:
+                    print("\nNo response received from the model.")
 
             except KeyboardInterrupt:
                 print("\nExiting...")
