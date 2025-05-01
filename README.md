@@ -13,6 +13,40 @@ A modular interactive chat application that uses the Ollama API with a music lov
 - Implements a knowledgeable music enthusiast personality
 - Enhanced error handling and connection verification
 - Configurable timeout settings
+- Intelligent music-focused query enhancement
+- Genre-specific terminology and context
+- Music theory integration
+- Debug mode for query transformations
+
+#### Music Features
+The chat application includes sophisticated music-focused enhancements:
+
+1. **Genre Recognition & Context**
+   - Automatically detects musical genres in queries
+   - Adds genre-specific context and terminology
+   - Supports: Classical, Jazz, Rock, Electronic, Hip-Hop, Folk
+   - Example: "Tell me about power chords" → "Tell me about power chords in the rock style"
+
+2. **Music Theory Integration**
+   - Enhances queries with relevant music theory concepts
+   - Categories include: Tempo, Dynamics, Structure, Harmony, Rhythm
+   - Adds appropriate theoretical context based on genre
+   - Example: "How do you write a chorus?" → "How do you write a chorus (considering aspects like verse)?"
+
+3. **Enhanced Music Terminology**
+   - Converts casual terms to precise musical language
+   - Maintains natural conversation flow while adding precision
+   - Examples:
+     - "song" → "musical piece"
+     - "band" → "musical group"
+     - "singer" → "vocalist"
+
+4. **Intelligent Query Processing**
+   - Adds musical context to non-musical queries
+   - Preserves original meaning while adding musical perspective
+   - Examples:
+     - "What makes summer special?" → "From a musical perspective, what makes summer special?"
+     - "Tell me about the 1960s" → "Tell me about the musical aspects of the 1960s"
 
 #### Project Structure
 ```
@@ -91,13 +125,50 @@ ollama-chat --host http://remote-server:11434
 
 # Set custom timeout
 ollama-chat --timeout 30
+
+# Enable debug mode to see query enhancements
+ollama-chat --debug
 ```
 
 ### Using the Chat
 1. The application will first verify the connection to Ollama and check model availability
 2. Once connected, you can start chatting about music!
 3. Use the up and down arrow keys to navigate through your command history
-4. Press Ctrl+C to exit
+4. Your queries will be automatically enhanced with musical context
+5. Try different types of questions:
+   - Direct music questions: "What makes a good melody?"
+   - Genre-specific: "Explain jazz improvisation"
+   - Theory-focused: "How do dynamics work in classical music?"
+   - General topics: "How does weather affect mood?" (will add musical perspective)
+6. Use debug mode to see how your queries are enhanced
+7. Press Ctrl+C to exit
+
+### Query Enhancement Examples
+Here are some examples of how the chat enhances your queries:
+
+1. **Genre-Specific Enhancement**:
+   ```
+   Input: "Tell me about power chords"
+   Enhanced: "Tell me about power chords in the rock style"
+   ```
+
+2. **Theory Integration**:
+   ```
+   Input: "How do you write a chorus?"
+   Enhanced: "How do you write a chorus (considering aspects like verse)?"
+   ```
+
+3. **Terminology Precision**:
+   ```
+   Input: "What makes a good song?"
+   Enhanced: "What makes a good musical piece?"
+   ```
+
+4. **Adding Musical Context**:
+   ```
+   Input: "What makes summer special?"
+   Enhanced: "From a musical perspective, what makes summer special?"
+   ```
 
 ### Troubleshooting
 If you encounter issues:
@@ -115,6 +186,7 @@ If you encounter issues:
    - Check Python environment is activated
    - Verify all dependencies are installed
    - Look for error messages in the output
+   - Try running with --debug flag to see query processing
 
 ## Development
 
@@ -131,6 +203,6 @@ pytest tests/ --cov=src/ollama_chat
 
 ### Project Components
 - `command_history.py`: Implements a doubly-linked list for command history
-- `interactive_prompt.py`: Handles terminal input and command history navigation
+- `interactive_prompt.py`: Handles terminal input and command history navigation, including music-focused query enhancement
 - `ollama_client.py`: Manages communication with the Ollama API, including error handling and connection verification
 - `app.py`: Ties everything together into a cohesive application 
