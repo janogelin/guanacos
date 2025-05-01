@@ -6,14 +6,14 @@ import sys
 from typing import Optional
 
 from .ollama_client import OllamaClient
-from .interactive_prompt import InteractivePrompt
+from .interactive_prompt import MusicPrompt
 
 class OllamaChatApp:
     """Main application class for the interactive Ollama chat."""
     
     def __init__(self, host: str = 'http://localhost:11434', model: str = 'gemma3:4b'):
         self.client = OllamaClient(host, model)
-        self.prompt = InteractivePrompt("Chat 🗣️ > ")
+        self.prompt = MusicPrompt("Chat 🎵 > ")
         
         # Define the music lover persona
         self.client.set_system_prompt("""You are an enthusiastic and knowledgeable music lover with a deep passion 
@@ -45,6 +45,7 @@ and personal perspective while being informative and engaging.""")
         print(f"\nWelcome to the Interactive Music Chat! (Using {self.client.model})")
         print("Type your questions about music, or press Ctrl+C to exit.")
         print("Use ↑/↓ arrow keys to navigate through command history.")
+        print("Your questions will be automatically enhanced with musical context!")
         print()
 
         while True:
