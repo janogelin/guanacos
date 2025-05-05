@@ -2,7 +2,8 @@ import requests
 import argparse
 import json
 
-OLLAMA_HOST = 'http://localhost:11434'  # Adjust if your Ollama server is running elsewhere
+# OLLAMA_HOST = 'http://localhost:11434'  # Adjust if your Ollama server is running elsewhere
+OLLAMA_HOST = 'http://localhost:3000'  # Adjust if your Ollama server is running elsewhere
 MODEL = 'gemma3:4b'
 
 # Define the music lover persona
