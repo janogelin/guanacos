@@ -188,6 +188,71 @@ If you encounter issues:
    - Look for error messages in the output
    - Try running with --debug flag to see query processing
 
+## Running the FastAPI REST API
+
+The project includes a REST API for programmatic access to the Ollama (Gemma) model using FastAPI.
+
+### API Files
+- `src/ollama_chat/fastapi_ollama.py`: Defines the FastAPI app and endpoints
+- `src/ollama_chat/fastapi_run.py`: Entrypoint to run the FastAPI server with Uvicorn
+- `src/ollama_chat/example_client.py`: Example Python client for the API
+
+### Running the API Server
+Start the FastAPI server with:
+```bash
+python src/ollama_chat/fastapi_run.py
+```
+The server will be available at `http://localhost:8000` by default.
+
+- Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- ReDoc UI: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+### API Endpoints
+
+#### POST `/chat`
+Send a chat message to the model and receive a response.
+- **Request Body:**
+  ```json
+  {
+    "message": "Your message here",
+    "system_prompt": "Optional system prompt"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "response": "Model's response as a string"
+  }
+  ```
+
+#### GET `/healthz`
+Check if the Ollama server and model are available.
+- **Response:**
+  ```json
+  {
+    "status": "ok",
+    "message": "Connected to Ollama ..."
+  }
+  ```
+
+### Example Python Client
+See `src/ollama_chat/example_client.py` for a usage example:
+```python
+import requests
+
+API_URL = "http://localhost:8000/chat"
+payload = {
+    "message": "Hello, what can you tell me about the Gemma model?",
+    # "system_prompt": "You are a helpful assistant."
+}
+response = requests.post(API_URL, json=payload)
+if response.ok:
+    print(response.json()["response"])
+else:
+    print(f"Error: {response.status_code}")
+    print(response.text)
+```
+
 ## Development
 
 ### Running Tests
