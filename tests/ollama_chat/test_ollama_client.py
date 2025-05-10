@@ -6,12 +6,13 @@ import pytest
 from unittest.mock import patch, MagicMock
 from src.ollama_chat.ollama_client import OllamaClient
 import requests
+from requests.exceptions import HTTPError
 
 def test_init():
     """Test client initialization."""
     client = OllamaClient()
     assert client.host == 'http://localhost:11434'
-    assert client.model == 'gemma:4b'
+    assert client.model == 'gemma3:4b'
     assert client.system_prompt is None
     
     client = OllamaClient('http://example.com/', 'different-model')
@@ -45,7 +46,7 @@ def test_chat_success(mock_post):
     
     # Verify the request payload
     call_args = mock_post.call_args
-    assert call_args[1]['json']['model'] == 'gemma:4b'
+    assert call_args[1]['json']['model'] == 'gemma3:4b'
     assert call_args[1]['json']['messages'][0]['content'] == "Test message"
 
 @patch('requests.post')
@@ -82,7 +83,7 @@ def test_chat_error_handling(mock_post):
     mock_post.side_effect = requests.exceptions.RequestException("Connection failed")
     responses = list(client.chat("Test message"))
     assert len(responses) == 1
-    assert "Error: Could not connect to Ollama server: Connection failed" in responses[0]
+    assert "Error: Request failed: Connection failed" in responses[0]
     
     # Test JSON decode error
     mock_response = MagicMock()
@@ -102,12 +103,17 @@ def test_check_connection(mock_get):
     
     # Test successful connection
     mock_get.return_value.status_code = 200
-    assert client.check_connection() is True
+    mock_get.return_value.raise_for_status.side_effect = None
+    success, message = client.check_connection()
+    assert success is True
     
     # Test failed connection
     mock_get.return_value.status_code = 500
-    assert client.check_connection() is False
+    mock_get.return_value.raise_for_status.side_effect = HTTPError("Server error")
+    success, message = client.check_connection()
+    assert success is False
     
     # Test connection error
     mock_get.side_effect = Exception("Connection error")
-    assert client.check_connection() is False 
+    success, message = client.check_connection()
+    assert success is False 

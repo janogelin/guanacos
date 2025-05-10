@@ -10,8 +10,8 @@ def test_init():
     """Test application initialization."""
     app = OllamaChatApp()
     assert app.client.host == 'http://localhost:11434'
-    assert app.client.model == 'gemma:4b'
-    assert app.prompt.prompt_text == "Chat 🗣️ > "
+    assert app.client.model == 'gemma3:4b'
+    assert app.prompt.prompt_text == "Chat 🎵 > "
     assert app.client.system_prompt is not None  # Should have music lover persona
 
 def test_init_custom_params():
@@ -26,11 +26,11 @@ def test_check_ollama_connection(mock_check):
     app = OllamaChatApp()
     
     # Test successful connection
-    mock_check.return_value = True
+    mock_check.return_value = (True, "OK")
     assert app.check_ollama_connection() is True
     
     # Test failed connection
-    mock_check.return_value = False
+    mock_check.return_value = (False, "Error")
     assert app.check_ollama_connection() is False
 
 @patch('src.ollama_chat.app.OllamaChatApp.check_ollama_connection')
@@ -51,7 +51,7 @@ def test_run_normal_flow(mock_chat, mock_input, mock_check):
     app.run()
     
     # Verify interactions
-    mock_chat.assert_called_once_with("test question")
+    mock_chat.assert_called_once_with("Tell me about the musical aspects of test question")
     assert mock_input.call_count == 2
 
 @patch('src.ollama_chat.app.OllamaChatApp.check_ollama_connection')
