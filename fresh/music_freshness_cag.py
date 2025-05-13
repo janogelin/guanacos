@@ -41,6 +41,7 @@ import importlib.util
 import pathlib
 import requests
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Configuration
 TOP_SITES = [
@@ -63,8 +64,13 @@ os.makedirs(CRAWL_OUTPUT_DIR, exist_ok=True)
 def safe_etcd_client(host, port):
     try:
         client = etcd3.client(host=host, port=port)
-        # Test connection
-        list(client.status().items())
+        # Test connection by putting and getting a test key
+        test_key = "cag_etcd_test_key"
+        client.put(test_key, "test")
+        value, _ = client.get(test_key)
+        client.delete(test_key)
+        if value != b"test":
+            raise Exception("etcd test key mismatch")
         return client
     except Exception as e:
         print(f"[ERROR] Could not connect to etcd at {host}:{port}. Is etcd running and accessible?\nError: {e}")
@@ -182,14 +188,14 @@ Question: {query}
         sys.exit(1)
 
 def main():
-    # Step 1: Crawl all top sites (in parallel, respecting thread limits)
-    threads = []
-    for url in TOP_SITES:
-        t = Thread(target=crawl_and_store, args=(url,))
-        t.start()
-        threads.append(t)
-    for t in threads:
-        t.join()
+    # Step 1: Crawl all top sites using a pool of 6 threads
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        futures = [executor.submit(crawl_and_store, url) for url in TOP_SITES]
+        for future in as_completed(futures):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"[ERROR] Exception during crawling: {e}")
     # Step 2: Extract and store embeddings
     extract_and_store_embeddings()
     # Step 3: Query example
