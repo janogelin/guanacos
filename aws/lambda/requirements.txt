@@ -1,0 +1,3 @@
+urllib3 
+etcd3
+chromadb 
