@@ -1,68 +1,39 @@
 
-Top Music Sites:
-
+<top five sites>
 https://www.billboard.com/
 https://pitchfork.com/
 https://www.rollingstone.com/
 https://www.nme.com/
+</top five sites>
+
+<etcd>
+use etcd to limit number of threads crawling each domain (default 5 threads)
+<tasks>
+
+store the base domains from top five sites with 5 tokens
 
 1.
-etcdctl get /crawler/semaphores/cnn.com/ --prefix --keys-only
+example using base domain storing site in etcd:
+etcdctl get /crawler/semaphores/billboard.com/ --prefix --keys-only
 
-if count < 5 proceed
+limiting to 5 
 
 2.
+if count < 5 proceed
+
 /crawler/semaphores/cnn.com/thread-<UUID>
 
 lease_id=$(etcdctl lease grant 300)
 etcdctl put /crawler/semaphores/cnn.com/thread-<UUID> "" --lease=$lease_id
 
 3.
-Crawln the url follow anchortext but limit to the 5 domains
+Crawln the url using the python program and store the output in json format
 
-ex retrieval:
 
-import requests
-from bs4 import BeautifulSoup
-import os
-
-def scrape_and_save_webpage(url, output_dir):
-    """Scrapes a webpage, extracts text, and saves it to a text file."""
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an exception for bad status codes
-
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        # Extract text (you might need to refine this based on the specific website)
-        text_content = soup.get_text(separator='\n', strip=True)
-
-        # Create the output directory if it doesn't exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
-        # Save the text to a file
-        filename = url.replace("http://", "").replace("https://", "").replace("/", "_")
-        file_path = os.path.join(output_dir, filename + ".txt")
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(text_content)
-        print(f"Saved {url} to {file_path}")
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching {url}: {e}")
-    except Exception as e:
-        print(f"Error processing {url}: {e}")
-
-# Example usage:
-if __name__ == "__main__":
-    target_url = "https://www.example.com"
-    output_directory = "web_page_data"
-    scrape_and_save_webpage(target_url, output_directory)
 
 
 Extract embeddings.
-Store local embeddings in a database like Chroma, Pinecone, Weaviate, Qdrant etc....
-
+Store local embeddings in a database locally using chroma vector DB
 
 # Example:
 import chromadb
@@ -72,32 +43,17 @@ from sentence_transformers import SentenceTransformer
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Example documents
-documents = [
-    "Ollama lets you run LLMs locally.",
-    "Vector databases are used for similarity search.",
-    "Chroma is a lightweight vector DB for local use."
-]
+documents = data from crawled json file
 
-# Embed documents
-embeddings = embedder.encode(documents).tolist()
+embeddings = Embed documents from json to embeddings
 
-# Setup Chroma DB or use hosted version https://docs.trychroma.com/docs/overview/introduction
-chroma_client = chromadb.Client()
-collection = chroma_client.create_collection("knowledge")
-
-# Add documents to collection
-for i, (doc, vec) in enumerate(zip(documents, embeddings)):
-    collection.add(
-        documents=[doc],
-        embeddings=[vec],
-        ids=[str(i)]
-    )
+add documents to collection
 
 
-
+4. run test program with example query
 Query using vector search
 
-query = "How does Ollama work?"
+query = "Latest news"
 query_embedding = embedder.encode([query]).tolist()
 
 # Find top relevant context
@@ -122,9 +78,9 @@ Context:
 Question: {query}
 """
 
-# Call Ollama model (e.g., mistral)
+# Call Ollama model (e.g., gemma3:4b)
 result = subprocess.run(
-    ["ollama", "run", "mistral"],
+    ["ollama", "run", "gemma3"],
     input=prompt.encode(),
     capture_output=True
 )
