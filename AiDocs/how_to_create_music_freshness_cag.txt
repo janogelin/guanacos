@@ -81,7 +81,7 @@ documents = [
 # Embed documents
 embeddings = embedder.encode(documents).tolist()
 
-# Setup Chroma DB
+# Setup Chroma DB or use hosted version https://docs.trychroma.com/docs/overview/introduction
 chroma_client = chromadb.Client()
 collection = chroma_client.create_collection("knowledge")
 
