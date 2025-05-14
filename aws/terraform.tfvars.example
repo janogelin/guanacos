@@ -1,0 +1,26 @@
+# terraform.tfvars.example
+
+aws_region = "us-west-2" 
+
+etcd_ami = "ami-xxxxxxxxxxxxxxxxx"   # Replace with a valid Linux AMI ID for your region
+etcd_key_name = "your-ssh-key-name"  # Replace with your EC2 key pair name
+# etcd_instance_type = "t3.small"
+# etcd_cluster_size = 3 
+
+gpu_ami = "ami-xxxxxxxxxxxxxxxxx"   # Replace with a valid GPU-enabled AMI ID for your region
+gpu_key_name = "your-ssh-key-name"  # Replace with your EC2 key pair name
+# gpu_instance_type = "g4dn.xlarge" 
+
+lambda_s3_bucket = "your-lambda-deployment-bucket"   # S3 bucket for Lambda deployment package
+lambda_s3_key    = "lambda/ollama_api.zip"           # S3 key for Lambda deployment package
+# lambda_function_name = "ollama-api-handler"
+# lambda_handler = "lambda_function.lambda_handler"
+# lambda_runtime = "python3.11"
+# api_gateway_name = "ollama-api-gateway"
+
+crawler_lambda_s3_bucket = "your-lambda-deployment-bucket"   # S3 bucket for crawler Lambda deployment package
+crawler_lambda_s3_key    = "lambda/crawler_lambda.zip"        # S3 key for crawler Lambda deployment package
+# crawler_lambda_function_name = "music-crawler-handler"
+# crawler_lambda_handler = "crawler_lambda.lambda_handler"
+# crawler_lambda_runtime = "python3.11"
+# crawler_cron_schedule = "cron(0/5 * * * ? *)"
